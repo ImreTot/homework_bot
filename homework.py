@@ -58,11 +58,11 @@ def get_api_answer(timestamp):
     except requests.RequestException:
         logging.error('С ответом от сервера что-то не так.')
         return None
-    try:
-        response.raise_for_status()
-    except requests.exceptions.HTTPError:
-        logging.error('Status code ответа не 200')
-        return None
+    # try:
+    #     response.raise_for_status()
+    # except requests.exceptions.HTTPError:
+    #     logging.error('Status code ответа не 200')
+    #     return None
     response = check_response(response.json())
     return response
 
