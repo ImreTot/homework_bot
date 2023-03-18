@@ -1,4 +1,5 @@
 import os
+import sys
 import logging
 import time
 
@@ -7,9 +8,14 @@ import requests
 from dotenv import load_dotenv
 import telegram
 
+file_handler = logging.FileHandler(filename='main.log', mode='w')
+stdout_handler = logging.StreamHandler(stream=sys.stdout)
+handlers = [file_handler, stdout_handler]
+
 logging.basicConfig(
     level=logging.DEBUG,
-    format='%(asctime)s, %(levelname)s, %(message)s'
+    format='%(asctime)s, %(levelname)s, %(message)s',
+    handlers=handlers
 )
 
 load_dotenv()
@@ -31,11 +37,7 @@ HOMEWORK_VERDICTS = {
 
 def check_tokens():
     """Проверяет доступность переменных окружения."""
-    if PRACTICUM_TOKEN and TELEGRAM_TOKEN and TELEGRAM_CHAT_ID:
-        return True
-    else:
-        logging.critical('Отсутствует одна из переменных окружения.')
-        return False
+    return all([PRACTICUM_TOKEN, TELEGRAM_TOKEN, TELEGRAM_CHAT_ID])
 
 
 def send_message(bot, message):
@@ -58,19 +60,15 @@ def get_api_answer(timestamp):
     except requests.RequestException:
         logging.error('С ответом от сервера что-то не так.')
         return None
-    # try:
-    #     response.raise_for_status()
-    # except requests.exceptions.HTTPError:
-    #     logging.error('Status code ответа не 200')
-    #     return None
     response = check_response(response.json())
     return response
 
 
 def check_response(response):
     """Проверяет соответствие ответа документации Яндекс.Практикума."""
-    if type(response) == dict and type(response.get('homeworks')) == list:
-        if type(response['homeworks']) == list:
+    if isinstance(response, dict) \
+            and isinstance(response.get('homeworks'), list):
+        if isinstance(response['homeworks'], list):
             return response
         else:
             logging.critical('Тип данных ответа от API '
@@ -104,7 +102,8 @@ def main():
         bot = telegram.Bot(token=TELEGRAM_TOKEN)
         timestamp = int(time.time())
     else:
-        return print('Недоступна одна из переменных окружения.')
+        logging.critical('Отсутствует одна из переменных окружения.')
+        sys.exit('Отсутствует одна из переменных окружения.')
     while True:
         try:
             if api_answer := get_api_answer(timestamp).get('homeworks')[0]:
