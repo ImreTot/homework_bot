@@ -1,5 +1,5 @@
 # Homework bot
-_Telegram bot checks the status of homework on the Yandex.Practice service._
+_Telegram bot checks the status of homework on the Yandex.Practicum service._
 
 ## Installation and operation
 The bot module is completely ready for use. It written on Python3.9 version. After running virtual enviroment run this command to install dependencies:
